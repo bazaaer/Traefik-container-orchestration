@@ -1,0 +1,41 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "${EMAIL}"
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
+
+middlewares:
+  redirect-middleware:
+    regex: "^/.*"
+    replace: "/"
+
+http:
+  routers:
+    redirect-router:
+      rule: "Path(`/`)"
+      middlewares:
+        - redirect-middleware
+      enteryPoints:
+        - web
+
+
+providers:
+  docker:
+    network: traefik
+
+api:
+  dashboard: true
